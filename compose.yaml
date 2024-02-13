@@ -1,0 +1,123 @@
+services:
+  web-dev: 
+    image: techmanager-dev:latest
+    restart: always
+    build:
+      context: .
+      target: builder
+      dockerfile: backend/Dockerfile
+      args:
+        - PORT=${WEB_DEV_PORT:-7000}
+        - REQUIREMENT=local
+    volumes:
+      - ./backend:/app
+      - .env:/app/.env
+    ports: 
+      - '${WEB_DEV_PORT:-7000}:${WEB_DEV_PORT:-7000}'
+    profiles:
+      - web-dev
+      - dev
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        python3 manage.py migrate &
+        python3 manage.py runserver ${WEB_DEV_HOST:-0.0.0.0}:${WEB_DEV_PORT:-7000}
+
+
+  web-prod: 
+    image: techmanager-prod:latest
+    build:
+      context: .
+      target: builder
+      dockerfile: backend/Dockerfile
+      args:
+        - PORT=${WEB_PROD_PORT:-9000}
+        - REQUIREMENT=base
+    volumes:
+      - ./backend:/app
+      - .env:/app/.env
+    ports: 
+      - '${WEB_PROD_PORT:-9000}:${WEB_PROD_PORT:-9000}'
+    profiles:
+      - web-prod
+      - prod
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        cd /app/ &&
+        python3 manage.py collectstatic --noinput &&
+        python3 manage.py migrate &&
+        gunicorn -b ${WEB_PROD_HOST:-0.0.0.0}:${WEB_PROD_PORT:-9000} config.wsgi:application
+
+  front-dev:
+    image: frontend-dev:latest
+    restart: always
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    volumes:
+      - ./frontend:/app
+      - .env:/app/.env
+    ports: 
+      - '${FRONT_DEV_PORT}:${FRONT_DEV_PORT}'
+    profiles:
+      - front-dev
+      - dev
+    command:
+      - sh
+      - -c
+      - |
+        cd /app/ &&
+        npm install &&
+        npm run dev
+
+  front-prod:
+    image: frontend-prod:latest
+    restart: always
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    volumes:
+      - ./frontend:/app
+      - .env:/app/.env
+    ports: 
+      - '${FRONT_PROD_PORT}:${FRONT_PROD_PORT}'
+    profiles:
+      - front-prod
+      - prod
+    command:
+      - sh
+      - -c
+      - |
+        cd /app/ &&
+        npm install &&
+        npm run build &&
+        node server.cjs
+        
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_EXT_PORT}:${DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
