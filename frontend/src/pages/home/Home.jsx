@@ -20,23 +20,11 @@ export default function Home(){
         <div>
 
             <h3 className="text-start text-4xl text-secondary-foreground font-normal mx-5 my-0 border-b-2 border-b-secondary-foreground">
-                Bem-vindo {userData.email?.split('@')[0]}
+                {console.log(userData)}
+                Bem-vindo, {userData.first_name?.split('@')[0]}!
             </h3>
             
             <div className="mt-16 flex flex-row items-center justify-evenly">
-                <div className="p-1">
-                    <NavLink to="/">
-                        <Card className="bg-foreground text-secondary p-2">
-                            <CardTitle>
-                                Estacionamentos 
-                            </CardTitle>
-                            <CardContent className="flex aspect-square items-center justify-center p-6">
-                                <i className="fas fa-parking text-9xl"></i>
-                            </CardContent>
-                        </Card>
-                    </NavLink>
-                </div>
-
                 <Carousel className="w-full max-w-xs">
                     <CarouselContent>
                         {Array.from({ length: 5 }).map((_, index) => (
