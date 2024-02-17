@@ -8,6 +8,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { NavLink } from 'react-router-dom'
+import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table.jsx' 
 
 import { AuthContext } from "../../context/AuthContext.jsx"
 
@@ -23,6 +24,53 @@ export default function Home(){
                 {console.log(userData)}
                 Bem-vindo, {userData.first_name?.split('@')[0]}!
             </h3>
+
+            <div className="mt-16 flex flex-row items-center justify-evenly">
+                <Table>
+                    <TableHeader>
+                        <TableHead>Teste</TableHead>
+                        <TableHead>Teste</TableHead>
+                        <TableHead>Teste</TableHead>
+                        <TableHead>Teste</TableHead>
+                        <TableHead>Teste</TableHead>
+                        <TableHead>Teste</TableHead>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                            <TableCell>Teste</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </div>
             
             <div className="mt-16 flex flex-row items-center justify-evenly">
                 <Carousel className="w-full max-w-xs">

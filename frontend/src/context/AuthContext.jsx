@@ -49,7 +49,7 @@ export function AuthProvider( { children } ) {
         }
     }, [isAuthenticated])
     
-    
+    const [mutationError, setMutationError] = useState(null);
     
     const loginMutation = useMutation({
         mutationFn: (variables) => loginUser(variables), 
@@ -66,6 +66,7 @@ export function AuthProvider( { children } ) {
             console.log(`Error: ${error}`)
             console.log(`Variables: ${variables}`)
             console.log(`Context: ${context}`)
+            setMutationError(error);
         }
     });
 
@@ -86,6 +87,8 @@ export function AuthProvider( { children } ) {
         isAuthenticated: isAuthenticated,
         setIsAuthenticated: setIsAuthenticated,
         loginMutation: loginMutation,
+        mutationError: mutationError,
+        setMutationError: setMutationError,
         logout: logout, 
         userRoles: userRoles,
         setUserRoles: setUserRoles,
