@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import Home from "./pages/home/Home.jsx"
 import Login from "./pages/login/Login.jsx"
+import Tasks from "./pages/tasks/Tasks.jsx";
 import  ProtectedRoute from "./utils/ProtectedRoute"
 
 export default function App(){
@@ -14,9 +15,9 @@ export default function App(){
                 <Route path="/" element={<Home/>} />
             </Route >
             
-            {/* <Route path="/parking-lots" element={<ProtectedRoute allowedRoles={ ["Admin", "Owner"] } />} >
-                <Route path="/parking-lots" element={<ParkingLots />} />
-            </Route > */}
+            <Route path="/tasks/" element={<ProtectedRoute/>} >
+                <Route path="/tasks/" element={<Tasks />} />
+            </Route >
 
         </Routes>
   )
