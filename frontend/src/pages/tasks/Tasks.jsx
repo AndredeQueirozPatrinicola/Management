@@ -41,6 +41,10 @@ import authAPI from '@/src/api/authAPI.jsx'
 export default function Tasks(){
     let api = authAPI(); 
     const [ cards, setCards ] = useState([])
+    const [ newTaskData, setNewTaskData ] = useState({
+        "name":  "",
+        "description": ""
+    })
 
     useEffect(()=>{
         const getData = async () => {
@@ -49,6 +53,25 @@ export default function Tasks(){
         }
         getData()
     }, [])
+
+    const handleNewTaskCardChange = (e) => {
+        console.log(newTaskData)
+        setNewTaskData({
+            ...newTaskData,
+            [e.target.name]: e.target.value
+        });
+    }
+
+    const handleSubmit = (e) => {
+        const getData = async () => {
+            const data = await api.post(
+                'api/tasks/', 
+                newTaskData
+                ).then(res => res.data)
+            return data
+        }
+        getData()
+    }
 
     return (
         <div>
@@ -73,7 +96,7 @@ export default function Tasks(){
                                             <div className="grid w-full items-center gap-4">
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="name">Name</Label>
-                                                    <Input id="name" placeholder="Name of your task" />
+                                                    <Input id="name" placeholder="Name of your task" onChange={handleNewTaskCardChange} name='name'/>
                                                 </div>
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="framework">Group</Label>
@@ -91,13 +114,15 @@ export default function Tasks(){
                                                 </div>
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="description">Description</Label>
-                                                    <Textarea />
+                                                    <Textarea onChange={handleNewTaskCardChange} name='description'/>
                                                 </div>
                                             </div>
                                         </form>
                                     </CardContent>
                                     <CardFooter className="flex justify-between">
-                                        <Button>Deploy</Button>
+                                        <Button
+                                            onClick={handleSubmit}
+                                        >Deploy</Button>
                                     </CardFooter>
                                 </Card>
                             </DialogContent>
@@ -112,9 +137,9 @@ export default function Tasks(){
                     <CardContent
                         className='flex flex-wrap justify-around'
                     >
-                        {cards?.map((card)=>{
+                        {cards?.map((card, index)=>{
                             return (
-                                <Card className="w-[20%] mx-1 my-2">
+                                <Card className="w-[20%] mx-1 my-2" key={index}>
                                     <CardHeader>
                                         <CardTitle>{card.name}</CardTitle>
                                     </CardHeader>
