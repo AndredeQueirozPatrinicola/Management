@@ -1,5 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil } from '@fortawesome/free-solid-svg-icons';
+import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons'
+
+import { toast } from "sonner"
 
 import {
     Card,
@@ -46,16 +49,21 @@ export default function Tasks(){
         "description": ""
     })
 
+    const [openDialog, setOpenDialog] = useState(false);
+
     useEffect(()=>{
         const getData = async () => {
             const data = await api.get('api/tasks/').then(res => res.data)
             setCards(data)
         }
         getData()
-    }, [])
+        setNewTaskData({
+            "name":  "",
+            "description": ""
+        })
+    }, [openDialog])
 
     const handleNewTaskCardChange = (e) => {
-        console.log(newTaskData)
         setNewTaskData({
             ...newTaskData,
             [e.target.name]: e.target.value
@@ -63,14 +71,26 @@ export default function Tasks(){
     }
 
     const handleSubmit = (e) => {
-        const getData = async () => {
-            const data = await api.post(
+        const sendData = async () => {
+            await api.post(
                 'api/tasks/', 
                 newTaskData
-                ).then(res => res.data)
-            return data
+                )
+                .then((res) => {
+                    toast("Task has been created", {
+                        description: `Task ${res.data.name} created successfully`,
+                    })
+                    setOpenDialog(false);
+                    return res.data
+                })
+                .catch( (error) => {
+                    console.log(error)
+                    toast("Could not create task", {
+                        description: `We had a problem while creating your task. Please try again.`,
+                    })
+                  })
         }
-        getData()
+        sendData()
     }
 
     return (
@@ -82,7 +102,7 @@ export default function Tasks(){
                         <CardTitle>Options</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Dialog>
+                        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                             <DialogTrigger className="hover:underline">
                                 <FontAwesomeIcon icon={faPencil} />Add Task    
                             </DialogTrigger>
@@ -97,6 +117,7 @@ export default function Tasks(){
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="name">Name</Label>
                                                     <Input id="name" placeholder="Name of your task" onChange={handleNewTaskCardChange} name='name'/>
+                                                    {/* <span className='text-red-500 text-sm'><FontAwesomeIcon icon={faTriangleExclamation} />{}</span> */}
                                                 </div>
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="framework">Group</Label>
