@@ -27,11 +27,11 @@ class TasksApi(ApiAuthMixin, APIView):
     
     def post(self, request):
         serializer = self.TaskSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             insert_task(
                 name=serializer.data['name'],
                 description=serializer.data['description'],
                 user=request.user
             )
             return Response(serializer.data)
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=404)
