@@ -25,9 +25,10 @@ CORS_ALLOWED_ORIGINS = [
 # Application definition
 
 LOCAL_APPS = [
-    "management.api.apps.ApiConfig",
+    "management.schedule.apps.ScheduleConfig"
     "management.common.apps.CommonConfig",
     "management.auth.apps.AuthConfig",
+    "management.api.apps.ApiConfig",
 ]   
 
 THIRD_PARTY_APPS = [
@@ -46,8 +47,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    *LOCAL_APPS,
     *THIRD_PARTY_APPS,
+    *LOCAL_APPS,
 ]
 
 INSTALLED_APPS = [
