@@ -37,6 +37,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import NavBar from '@/src/components/NavBar.jsx'
+import Loader from '@/src/components/Loader';
 
 import authAPI from '@/src/api/authAPI.jsx'
 
@@ -50,6 +51,7 @@ export default function Tasks(){
     })
 
     const [openDialog, setOpenDialog] = useState(false);
+    const [ cardData, setCardData ] = useState({})
 
     useEffect(()=>{
         const getData = async () => {
@@ -62,6 +64,24 @@ export default function Tasks(){
             "description": ""
         })
     }, [openDialog])
+
+    const handleOpenedCard = (e) => {
+        const getData = async (e) => {
+            await api.get(
+                `api/tasks/${e.target.id}/`
+            )
+            .then((res) => {
+                setCardData({
+                    "id" : res.data.id,
+                    "name": res.data.name,
+                    "description": res.data.description
+                })
+            })
+            .catch(err => console.log(err))
+        }
+        setCardData({})
+        getData(e);
+    }
 
     const handleNewTaskCardChange = (e) => {
         setNewTaskData({
@@ -117,7 +137,6 @@ export default function Tasks(){
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="name">Name</Label>
                                                     <Input id="name" placeholder="Name of your task" onChange={handleNewTaskCardChange} name='name'/>
-                                                    {/* <span className='text-red-500 text-sm'><FontAwesomeIcon icon={faTriangleExclamation} />{}</span> */}
                                                 </div>
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="framework">Group</Label>
@@ -165,7 +184,7 @@ export default function Tasks(){
                                         <CardTitle>{card.name}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <form>
+                                        <div>
                                             <div className="grid w-full items-center gap-4">
                                                 <div className="flex flex-col space-y-1.5">
                                                     {card.name}
@@ -174,10 +193,44 @@ export default function Tasks(){
                                                     {card.description} 
                                                 </div>
                                             </div>
-                                        </form>
+                                        </div>
                                     </CardContent>
                                     <CardFooter className="flex justify-between">
-                                        <Button>Detail</Button>
+                                        <Dialog>
+                                            <DialogTrigger className="hover:underline">
+                                                <Button
+                                                    id={card.id}
+                                                    onClick={handleOpenedCard}
+                                                >Detail</Button>   
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <Card className="w-[98%]">
+                                                    <CardHeader>
+                                                        <CardTitle>{card.name}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                       {
+                                                            cardData.id ? 
+                                                            <div>
+                                                                <div className="grid w-full items-center gap-4">
+                                                                    <div className="flex flex-col space-y-1.5">
+                                                                        {card.name}
+                                                                    </div>
+                                                                    <div className="flex flex-col space-y-1.5">
+                                                                        {card.description} 
+                                                                    </div>
+                                                                </div>
+                                                            </div> :
+                                                            <Loader/>
+                                                       }
+                                                    </CardContent>
+                                                    <CardFooter className="flex justify-between">
+                                                        <Button
+                                                        >Deploy</Button>
+                                                    </CardFooter>
+                                                </Card>
+                                            </DialogContent>
+                                        </Dialog>
                                     </CardFooter>
                                 </Card>
                             )

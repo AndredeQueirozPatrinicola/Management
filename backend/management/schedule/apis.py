@@ -7,14 +7,15 @@ from management.auth.apis import ApiAuthMixin
 from management.schedule import models
 
 from .selectors import (
-    get_all_tasks
+    get_all_tasks,
+    get_task_by_id
 )
 
 from .services import (
     insert_task
 )
 
-class TasksApi(ApiAuthMixin, APIView):
+class TasksApi(APIView):
     class TaskSerializer(serializers.Serializer):
         id = serializers.IntegerField(required=False)
         name = serializers.CharField()
@@ -35,3 +36,13 @@ class TasksApi(ApiAuthMixin, APIView):
             )
             return Response(serializer.data)
         return Response(serializer.errors, status=404)
+    
+
+class TaskApi(TasksApi):
+
+    def get(self, request, pk):
+        task = get_task_by_id(pk)
+        if not task:
+            return Response({"detail" : "Not found"}, status=404)
+        serializer = self.TaskSerializer(task)
+        return Response(serializer.data)
