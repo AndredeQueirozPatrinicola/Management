@@ -38,6 +38,7 @@ import { useEffect, useState } from 'react'
 
 import NavBar from '@/src/components/NavBar.jsx'
 import Loader from '@/src/components/Loader';
+import TaskCardInfos from '@/src/components/TaskCardInfos';
 
 import authAPI from '@/src/api/authAPI.jsx'
 
@@ -47,7 +48,8 @@ export default function Tasks(){
     const [ cards, setCards ] = useState([])
     const [ newTaskData, setNewTaskData ] = useState({
         "name":  "",
-        "description": ""
+        "description": "",
+        "group": ""
     })
 
     const [openDialog, setOpenDialog] = useState(false);
@@ -61,7 +63,8 @@ export default function Tasks(){
         getData()
         setNewTaskData({
             "name":  "",
-            "description": ""
+            "description": "",
+            "group": ""
         })
     }, [openDialog])
 
@@ -76,7 +79,7 @@ export default function Tasks(){
                     "name": res.data.name,
                     "description": res.data.description
                 })
-            })
+            })  
             .catch(err => console.log(err))
         }
         setCardData({})
@@ -87,6 +90,13 @@ export default function Tasks(){
         setNewTaskData({
             ...newTaskData,
             [e.target.name]: e.target.value
+        });
+    }
+
+    const handleNewTaskCardSelectChange = (e) => {
+        setNewTaskData({
+            ...newTaskData,
+            group: e
         });
     }
 
@@ -140,15 +150,15 @@ export default function Tasks(){
                                                 </div>
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="framework">Group</Label>
-                                                    <Select>
+                                                    <Select name='group' onValueChange={handleNewTaskCardSelectChange}>
                                                         <SelectTrigger id="framework">
-                                                        <SelectValue placeholder="Select" />
+                                                            <SelectValue placeholder="Select"/>
                                                         </SelectTrigger>
                                                         <SelectContent position="popper">
-                                                        <SelectItem value="college">College</SelectItem>
-                                                        <SelectItem value="work">Work</SelectItem>
-                                                        <SelectItem value="bills">Bills</SelectItem>
-                                                        <SelectItem value="other">Other...</SelectItem>
+                                                        <SelectItem value="0">College</SelectItem>
+                                                        <SelectItem value="1">Work</SelectItem>
+                                                        <SelectItem value="2">Bills</SelectItem>
+                                                        <SelectItem value="3">Other...</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
@@ -184,24 +194,18 @@ export default function Tasks(){
                                         <CardTitle>{card.name}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div>
-                                            <div className="grid w-full items-center gap-4">
-                                                <div className="flex flex-col space-y-1.5">
-                                                    {card.name}
-                                                </div>
-                                                <div className="flex flex-col space-y-1.5">
-                                                    {card.description} 
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <TaskCardInfos
+                                            name={card.name}
+                                            description={card.description}
+                                            group={card.group}
+                                        />
                                     </CardContent>
                                     <CardFooter className="flex justify-between">
                                         <Dialog>
-                                            <DialogTrigger className="hover:underline">
-                                                <Button
-                                                    id={card.id}
-                                                    onClick={handleOpenedCard}
-                                                >Detail</Button>   
+                                            <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                                                id={card.id}
+                                                onClick={handleOpenedCard}
+                                                >Detail 
                                             </DialogTrigger>
                                             <DialogContent>
                                                 <Card className="w-[98%]">
@@ -211,16 +215,11 @@ export default function Tasks(){
                                                     <CardContent>
                                                        {
                                                             cardData.id ? 
-                                                            <div>
-                                                                <div className="grid w-full items-center gap-4">
-                                                                    <div className="flex flex-col space-y-1.5">
-                                                                        {card.name}
-                                                                    </div>
-                                                                    <div className="flex flex-col space-y-1.5">
-                                                                        {card.description} 
-                                                                    </div>
-                                                                </div>
-                                                            </div> :
+                                                            <TaskCardInfos
+                                                                name={card.name}
+                                                                description={card.description}
+                                                                group={card.group}
+                                                            /> :
                                                             <Loader/>
                                                        }
                                                     </CardContent>

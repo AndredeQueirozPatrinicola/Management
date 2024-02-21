@@ -7,14 +7,16 @@ def insert_task(
         name: str,
         description: str,
         user: User,
-) -> QuerySet[Task]:
+        group: int
+) -> Task:
     """
-        Insert One Task
+        Insert One Task and return the instance
     """
     task = Task(
         name=name,
         description=description,
-        user=user
+        user=user,
+        group=group
     )
     task.full_clean()
     task.save()

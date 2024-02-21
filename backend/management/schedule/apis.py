@@ -15,11 +15,12 @@ from .services import (
     insert_task
 )
 
-class TasksApi(APIView):
+class TasksApi(ApiAuthMixin, APIView):
     class TaskSerializer(serializers.Serializer):
         id = serializers.IntegerField(required=False)
         name = serializers.CharField()
         description = serializers.CharField()
+        group = serializers.CharField(max_length=1)
 
     def get(self, request):
         tasks = get_all_tasks()
@@ -32,7 +33,8 @@ class TasksApi(APIView):
             insert_task(
                 name=serializer.data['name'],
                 description=serializer.data['description'],
-                user=request.user
+                user=request.user,
+                group=serializer.data["group"]
             )
             return Response(serializer.data)
         return Response(serializer.errors, status=404)
