@@ -42,17 +42,36 @@ import TaskCardInfos from '@/src/components/TaskCardInfos';
 
 import authAPI from '@/src/api/authAPI.jsx'
 
+import { format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+ 
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+ 
 
 export default function Tasks(){
     let api = authAPI(); 
     const [ cards, setCards ] = useState([])
-    const [ newTaskData, setNewTaskData ] = useState({
-        "name":  "",
-        "description": "",
-        "group": ""
+    const [ groups, setGroups ] = useState([])
+    const [ newItemData, setNewItemData ] = useState({
+        "task" : {
+            "name":  "",
+            "description": "",
+            "group": ""
+        },
+        "group": {
+            "id": "",
+            "group": ""
+        }
     })
 
     const [openDialog, setOpenDialog] = useState(false);
+    const [openDialogGroup, setOpenDialogGroup] = useState(false);
     const [ cardData, setCardData ] = useState({})
 
     useEffect(()=>{
@@ -61,12 +80,31 @@ export default function Tasks(){
             setCards(data)
         }
         getData()
-        setNewTaskData({
-            "name":  "",
-            "description": "",
-            "group": ""
+        setNewItemData({
+            ...newItemData,
+            "task" : {
+                "name":  "",
+                "description": "",
+                "group": ""
+            }
         })
     }, [openDialog])
+
+    useEffect(()=>{
+        const getData = async () => {
+            const data = await api.get('api/groups/').then(res => res.data)
+            console.log(data)
+            setGroups(data)
+        }
+        getData()
+        setNewItemData({
+            ...newItemData,
+            "group" : {
+                "id": "",
+                "group":  "",
+            }
+        })
+    }, [openDialogGroup])
 
     const handleOpenedCard = (e) => {
         const getData = async (e) => {
@@ -86,37 +124,65 @@ export default function Tasks(){
         getData(e);
     }
 
+    const handleNewGroupCardChange = (e) => {
+        setNewItemData({
+            ...newItemData,
+            "group" : {
+                ...newItemData.group,
+                [e.target.name]: e.target.value
+            }
+        });
+    }
+
     const handleNewTaskCardChange = (e) => {
-        setNewTaskData({
-            ...newTaskData,
-            [e.target.name]: e.target.value
+        setNewItemData({
+            ...newItemData,
+            "task" : {
+                ...newItemData.task,
+                [e.target.name]: e.target.value
+            }
+        });
+    }
+
+    const handleNewTaskCardDateChange = (e) => {
+        const formattedDate = new Date(e).toISOString().split('T')[0];
+        setNewItemData({
+            ...newItemData,
+            "task" : {
+                ...newItemData.task,
+                date: formattedDate
+            }
         });
     }
 
     const handleNewTaskCardSelectChange = (e) => {
-        setNewTaskData({
-            ...newTaskData,
-            group: e
+        setNewItemData({
+            ...newItemData,
+            "task" : {
+                ...newItemData.task,
+                group: e
+            }
         });
     }
 
     const handleSubmit = (e) => {
+        const baseRef = e.target.name;
         const sendData = async () => {
             await api.post(
-                'api/tasks/', 
-                newTaskData
+                `api/${baseRef}s/`, 
+                newItemData[baseRef]
                 )
                 .then((res) => {
-                    toast("Task has been created", {
-                        description: `Task ${res.data.name} created successfully`,
+                    toast(`${baseRef} has been created`, {
+                        description: `${baseRef} ${res.data.name} created successfully`,
                     })
                     setOpenDialog(false);
                     return res.data
                 })
                 .catch( (error) => {
                     console.log(error)
-                    toast("Could not create task", {
-                        description: `We had a problem while creating your task. Please try again.`,
+                    toast(`Could not create ${baseRef}`, {
+                        description: `We had a problem while creating your ${baseRef}. Please try again.`,
                     })
                   })
         }
@@ -131,9 +197,9 @@ export default function Tasks(){
                     <CardHeader>
                         <CardTitle>Options</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className='flex flex-col'>
                         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                            <DialogTrigger className="hover:underline">
+                            <DialogTrigger className="flex flex-start mb-4 hover:underline">
                                 <FontAwesomeIcon icon={faPencil} />Add Task    
                             </DialogTrigger>
                             <DialogContent>
@@ -155,12 +221,48 @@ export default function Tasks(){
                                                             <SelectValue placeholder="Select"/>
                                                         </SelectTrigger>
                                                         <SelectContent position="popper">
-                                                        <SelectItem value="0">College</SelectItem>
-                                                        <SelectItem value="1">Work</SelectItem>
-                                                        <SelectItem value="2">Bills</SelectItem>
-                                                        <SelectItem value="3">Other...</SelectItem>
+                                                        {console.log(groups)}
+                                                        {console.log('?')}
+                                                        {
+                                                            groups?.map((group, index)=>{
+                                                                return (
+                                                                    <SelectItem key={index} value={group.id}>{group.group}</SelectItem>
+                                                                )
+                                                            })
+                                                        }
+                                                        {/* <SelectItem value="10">College</SelectItem>
+                                                        <SelectItem value="11">Work</SelectItem>
+                                                        <SelectItem value="22">Bills</SelectItem>
+                                                        <SelectItem value="33">Other...</SelectItem> */}
                                                         </SelectContent>
                                                     </Select>
+                                                </div>
+                                                <div className='flex justify-evenly items-center'>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <Button
+                                                            variant={"outline"}
+                                                            className={cn(
+                                                                "w-[280px] justify-start text-left font-normal",
+                                                                !newItemData.task.date && "text-muted-foreground"
+                                                            )}
+                                                            >
+                                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                                            {newItemData.task.date ? format(newItemData.task.date, "PPP") : <span>Pick a date</span>}
+                                                            </Button>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0">
+                                                            <Calendar
+                                                            mode="single"
+                                                            selected={newItemData.task.date}
+                                                            onSelect={handleNewTaskCardDateChange}
+                                                            initialFocus
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                    <div className="flex flex-col space-y-1.5">
+                                                        <Input id="time" placeholder="Hour..." onChange={handleNewTaskCardChange} name='time'/>
+                                                    </div>
                                                 </div>
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="description">Description</Label>
@@ -171,8 +273,37 @@ export default function Tasks(){
                                     </CardContent>
                                     <CardFooter className="flex justify-between">
                                         <Button
+                                            name='task'
                                             onClick={handleSubmit}
-                                        >Deploy</Button>
+                                        >Submit</Button>
+                                    </CardFooter>
+                                </Card>
+                            </DialogContent>
+                        </Dialog>
+                        <Dialog open={openDialogGroup} onOpenChange={setOpenDialogGroup}>
+                            <DialogTrigger className="flex flex-start mb-4 hover:underline">
+                                <FontAwesomeIcon icon={faPencil} />Add Group    
+                            </DialogTrigger>
+                            <DialogContent>
+                                <Card className="w-[98%]">
+                                    <CardHeader>
+                                        <CardTitle>Add Group</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <form>
+                                            <div className="grid w-full items-center gap-4">
+                                                <div className="flex flex-col space-y-1.5">
+                                                    <Label htmlFor="name">Group Name</Label>
+                                                    <Input id="name" placeholder="Name of your group" onChange={handleNewGroupCardChange} name='group'/>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between">
+                                        <Button
+                                            name='group'
+                                            onClick={handleSubmit}
+                                        >Submit</Button>
                                     </CardFooter>
                                 </Card>
                             </DialogContent>
@@ -197,6 +328,8 @@ export default function Tasks(){
                                         <TaskCardInfos
                                             name={card.name}
                                             description={card.description}
+                                            date={card.date}
+                                            time={card.time}
                                             group={card.group}
                                         />
                                     </CardContent>
@@ -218,6 +351,8 @@ export default function Tasks(){
                                                             <TaskCardInfos
                                                                 name={card.name}
                                                                 description={card.description}
+                                                                date={card.date}
+                                                                time={card.time}
                                                                 group={card.group}
                                                             /> :
                                                             <Loader/>
