@@ -8,7 +8,7 @@ def insert_group(
         user: Groups
 ) -> Groups:
     group = Groups(
-        name=name,
+        group=name,
         user=user
     )
     group.full_clean()

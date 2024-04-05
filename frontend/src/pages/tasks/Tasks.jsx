@@ -166,6 +166,7 @@ export default function Tasks(){
     }
 
     const handleSubmit = (e) => {
+        e.preventDefault()
         const baseRef = e.target.name;
         const sendData = async () => {
             await api.post(
@@ -290,7 +291,10 @@ export default function Tasks(){
                                         <CardTitle>Add Group</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <form>
+                                        <form 
+                                            name='group'
+                                            onSubmit={handleSubmit}
+                                        >
                                             <div className="grid w-full items-center gap-4">
                                                 <div className="flex flex-col space-y-1.5">
                                                     <Label htmlFor="name">Group Name</Label>
